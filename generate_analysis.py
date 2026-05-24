@@ -4,11 +4,14 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 import re
+from mappings import TAXA_MAPPING, DISTRICT_MAPPING
 
 # File Paths
-file_path = r"D:\data ana\M.Sc_thesis_non-thesis_final_data_sheet.xlsx"
-artifact_dir = r"C:\Users\USER\.gemini\antigravity\brain\0d411b3e-2c6d-44ac-b6ba-21eaa49e177c"
+script_dir = os.path.dirname(__file__)
+file_path = os.path.join(script_dir, "M.Sc_thesis_non-thesis_final_data_sheet.xlsx")
+artifact_dir = os.path.join(script_dir, "artifacts")
 output_md_path = os.path.join(artifact_dir, "msc_thesis_analysis_report.md")
+
 
 # Set plotting styles
 sns.set_theme(style="whitegrid")
@@ -91,33 +94,8 @@ df_clean['Publication_Status'] = df_clean['Fate'].apply(clean_fate)
 
 # 4. Clean Taxa Involved
 def map_taxa(val):
-    if pd.isna(val):
-        return "Unknown"
-    val = str(val).strip().lower()
-    if val in ['fish', 'actinopterygii', 'actinopterygii.']:
-        return "Fish"
-    elif val in ['insect', 'insecta', 'insecct', 'inset', 'diptera, culicidae.', 'diptera, culicidae']:
-        return "Insects"
-    elif val in ['birds', 'bird', 'aves', 'birds ']:
-        return "Birds"
-    elif val in ['mammals', 'mammal', 'mammalia', 'rhodents']:
-        return "Mammals (non-primate)"
-    elif val in ['primate', 'primates', 'primtes', 'primates and \nmammals']:
-        return "Primates"
-    elif val in ['amphibia', 'reptile', 'reptiles', 'reptilia', 'amphibia, reptiles', 'amphibia,reptile', 'amphibia ']:
-        return "Reptiles & Amphibians"
-    elif val in ['arthropods', 'arthropod', 'arthopods', 'arachmids', 'mollusca', 'micro-invertebrates', 'macro-invertebrates']:
-        return "Invertebrates (non-insect)"
-    elif val in ['plankton', 'benthos', 'phytoplankton', 'zoo plankton', 'rotifera,daphnia', 'plankton diversity', 'plankton']:
-        return "Plankton & Benthos"
-    elif val in ['conservation', 'diversity', 'fisherman livelihood', 'wildlife', 'condition', 'biodiversity', 'threatened', 'impact', 'pollution', 'quality', 'threat', 'management', 'livlihood']:
-        return "Ecology & Conservation"
-    elif val in ['insecticide', 'micro-organism', 'pesticide', 'protists']:
-        return "Micro-organisms / Toxicology"
-    elif val in ['fish and \nthropods', 'fish and arthropods', 'birds and mammals', 'mammal and aves', 'fish and \narthropods']:
-        return "Mixed Taxa"
-    else:
-        return "Other / Miscellaneous"
+    if pd.isna(val): return "Unknown"
+    return TAXA_MAPPING.get(str(val).strip().lower(), "Other / Miscellaneous")
 
 df_clean['Taxa_Cleaned'] = df_clean['Taxa involved'].apply(map_taxa)
 
@@ -136,46 +114,12 @@ df_clean['Duration_Months'] = df_clean['Time Required'].apply(parse_months)
 # 6. Clean District
 def clean_district(val):
     if pd.isna(val):
-        return "Not Specified"
-    val = str(val).strip()
-    val_lower = val.lower()
-    if val_lower == 'dhaka':
-        return 'Dhaka'
-    elif 'cox' in val_lower and 'bazar' in val_lower:
-        return "Cox's Bazar"
-    elif 'moulovibazar' in val_lower or 'moulvibazar' in val_lower:
-        return "Moulvibazar"
-    elif 'chittagong' in val_lower:
-        return 'Chittagong'
-    elif 'sylhet' in val_lower:
-        return 'Sylhet'
-    elif 'tangail' in val_lower:
-        return 'Tangail'
-    elif 'gazipur' in val_lower:
-        return 'Gazipur'
-    elif 'manikganj' in val_lower:
-        return 'Manikganj'
-    elif 'habiganj' in val_lower:
-        return 'Habiganj'
-    elif 'dinajpur' in val_lower:
-        return 'Dinajpur'
-    elif 'sundarban' in val_lower:
-        return 'Sundarbans'
-    elif 'madaripur' in val_lower:
-        return 'Madaripur'
-    elif 'netrokona' in val_lower:
-        return 'Netrokona'
-    elif 'pabna' in val_lower:
-        return 'Pabna'
-    elif 'rangpur' in val_lower:
-        return 'Rangpur'
-    elif 'jessore' in val_lower:
-        return 'Jessore'
-    elif 'narayanganj' in val_lower:
-        return 'Narayanganj'
-    elif 'comilla' in val_lower:
-        return 'Comilla'
-    return val
+        return "Not Specified" # Default for NaN
+    val_lower = str(val).strip().lower()
+    # Check for specific substrings first, then direct mapping
+    if 'cox' in val_lower and 'bazar' in val_lower: return "Cox's Bazar"
+    if 'sundarban' in val_lower: return 'Sundarbans'
+    return DISTRICT_MAPPING.get(val_lower, val) # Return original if not found in map
 
 df_clean['District_Cleaned'] = df_clean['District'].apply(clean_district)
 

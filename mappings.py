@@ -1,0 +1,41 @@
+# d:\data ana\mappings.py
+
+TAXA_MAPPING = {
+    'fish': "Fish", 'actinopterygii': "Fish", 'actinopterygii.': "Fish",
+    'insect': "Insects", 'insecta': "Insects", 'insecct': "Insects", 'inset': "Insects",
+    'diptera, culicidae.': "Insects", 'diptera, culicidae': "Insects",
+    'birds': "Birds", 'bird': "Birds", 'aves': "Birds", 'birds ': "Birds",
+    'mammals': "Mammals (non-primate)", 'mammal': "Mammals (non-primate)", 'mammalia': "Mammals (non-primate)",
+    'rhodents': "Mammals (non-primate)",
+    'primate': "Primates", 'primates': "Primates", 'primtes': "Primates", 'primates and \nmammals': "Primates",
+    'amphibia': "Reptiles & Amphibians", 'reptile': "Reptiles & Amphibians", 'reptiles': "Reptiles & Amphibians",
+    'reptilia': "Reptiles & Amphibians", 'amphibia, reptiles': "Reptiles & Amphibians",
+    'amphibia,reptile': "Reptiles & Amphibians", 'amphibia ': "Reptiles & Amphibians",
+    'arthropods': "Invertebrates (non-insect)", 'arthropod': "Invertebrates (non-insect)",
+    'arthopods': "Invertebrates (non-insect)", 'arachmids': "Invertebrates (non-insect)",
+    'mollusca': "Invertebrates (non-insect)", 'micro-invertebrates': "Invertebrates (non-insect)",
+    'macro-invertebrates': "Invertebrates (non-insect)",
+    'plankton': "Plankton & Benthos", 'benthos': "Plankton & Benthos", 'phytoplankton': "Plankton & Benthos",
+    'zoo plankton': "Plankton & Benthos", 'rotifera,daphnia': "Plankton & Benthos",
+    'plankton diversity': "Plankton & Benthos",
+    'conservation': "Ecology & Conservation", 'diversity': "Ecology & Conservation",
+    'fisherman livelihood': "Ecology & Conservation", 'wildlife': "Ecology & Conservation",
+    'condition': "Ecology & Conservation", 'biodiversity': "Ecology & Conservation",
+    'threatened': "Ecology & Conservation", 'impact': "Ecology & Conservation",
+    'pollution': "Ecology & Conservation", 'quality': "Ecology & Conservation",
+    'threat': "Ecology & Conservation", 'management': "Ecology & Conservation",
+    'livlihood': "Ecology & Conservation",
+    'insecticide': "Micro-organisms / Toxicology", 'micro-organism': "Micro-organisms / Toxicology",
+    'pesticide': "Micro-organisms / Toxicology", 'protists': "Micro-organisms / Toxicology",
+    'fish and \nthropods': "Mixed Taxa", 'fish and arthropods': "Mixed Taxa",
+    'birds and mammals': "Mixed Taxa", 'mammal and aves': "Mixed Taxa", 'fish and \narthropods': "Mixed Taxa",
+}
+
+DISTRICT_MAPPING = {
+    'dhaka': 'Dhaka', 'moulovibazar': "Moulvibazar", 'moulvibazar': "Moulvibazar",
+    'chittagong': 'Chittagong', 'sylhet': 'Sylhet', 'tangail': 'Tangail',
+    'gazipur': 'Gazipur', 'manikganj': 'Manikganj', 'habiganj': 'Habiganj',
+    'dinajpur': 'Dinajpur', 'madaripur': 'Madaripur', 'netrokona': 'Netrokona',
+    'pabna': 'Pabna', 'rangpur': 'Rangpur', 'jessore': 'Jessore',
+    'narayanganj': 'Narayanganj', 'comilla': 'Comilla',
+}

@@ -13,7 +13,7 @@ The dataset contains **788** clean records of M.Sc research projects spanning fr
 
 Thesis research represents the vast majority of the research database. However, non-thesis projects form a substantial subset of student research, particularly in recent years.
 
-![Research Project Type Distribution](file:///C:/Users/USER/.gemini/antigravity/brain/0d411b3e-2c6d-44ac-b6ba-21eaa49e177c/research_type_dist.png)
+![Research Project Type Distribution](./artifacts/research_type_dist.png)
 
 ---
 
@@ -23,7 +23,7 @@ The volume of M.Sc research has grown significantly over time, with marked fluct
 * **Theses** have been consistently conducted since 1985.
 * **Non-Theses** appear in the records primarily in later periods.
 
-![Research Trends Over Time](file:///C:/Users/USER/.gemini/antigravity/brain/0d411b3e-2c6d-44ac-b6ba-21eaa49e177c/research_trends.png)
+![Research Trends Over Time](./artifacts/research_trends.png)
 
 ### Volume by Academic Year (Recent 15 Years)
 Below is the volume of M.Sc research projects conducted in the last 15 academic years recorded in the dataset:
@@ -52,7 +52,7 @@ Below is the volume of M.Sc research projects conducted in the last 15 academic 
 
 Research is highly focused on specific zoological taxa. **Fish** and **Insects** make up the vast majority (nearly **48%**) of all research projects.
 
-![Taxonomic Focus](file:///C:/Users/USER/.gemini/antigravity/brain/0d411b3e-2c6d-44ac-b6ba-21eaa49e177c/taxa_distribution.png)
+![Taxonomic Focus](file:///./artifacts/taxa_distribution.png)
 
 ### Research Volume by Taxa Category
 
@@ -81,7 +81,7 @@ A key measure of research impact is the publication rate.
 * **Published** articles account for **57** projects.
 * Other dissemination modes include **Conference Papers** and **Preprints**.
 
-![Publication Status Breakdown](file:///C:/Users/USER/.gemini/antigravity/brain/0d411b3e-2c6d-44ac-b6ba-21eaa49e177c/publication_rates.png)
+![Publication Status Breakdown](./artifacts/publication_rates.png)
 
 ### Detailed Publication Status Breakdown
 
@@ -117,7 +117,7 @@ The standard duration for both project types is typically **12 months**, but som
 
 Research is heavily clustered in specific geographic districts. **Dhaka** is by far the most dominant research location, representing the location of the host institute (Jahangirnagar University is situated in Savar, Dhaka district) and local sampling.
 
-![Top Districts Studied](file:///C:/Users/USER/.gemini/antigravity/brain/0d411b3e-2c6d-44ac-b6ba-21eaa49e177c/top_districts.png)
+![Top Districts Studied](./artifacts/top_districts.png)
 
 ### Top 15 Districts / Regions Studied
 

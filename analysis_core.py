@@ -1,200 +1,106 @@
 from __future__ import annotations
 
+import os
 import re
-from pathlib import Path
-
 import pandas as pd
+import numpy as np
+from mappings import TAXA_MAPPING, DISTRICT_MAPPING
 
+# Define the data file path relative to this script
+SCRIPT_DIR = os.path.dirname(__file__)
+DATA_FILE = os.path.join(SCRIPT_DIR, "M.Sc_thesis_non-thesis_final_data_sheet.xlsx")
 
-DATA_FILE = Path(__file__).with_name("M.Sc_thesis_non-thesis_final_data_sheet.xlsx")
-
-
-def clean_research_type(value: object) -> str:
-    if pd.isna(value):
+def clean_research_type(val):
+    if pd.isna(val):
         return "Unknown"
-    text = str(value).strip().lower()
-    if "non-thesis" in text or "non thesis" in text:
-        return "Non-Thesis"
-    if "thesis" in text:
-        return "Thesis"
-    return "Other"
+    val_str = str(val).strip().lower()
+    if 'non-thesis' in val_str:
+        return 'Non-Thesis'
+    elif 'thesis' in val_str:
+        return 'Thesis'
+    else:
+        return 'Other'
 
-
-def clean_year(value: object) -> str | None:
-    if pd.isna(value):
+def clean_year(val):
+    if pd.isna(val):
         return None
-    text = str(value).strip()
-    if text.lower() == "unknown" or not text:
+    val = str(val).strip()
+    if val.lower() == 'unknown' or val == '':
         return None
-    if text == "1885-1986":
-        return "1985-1986"
-    if re.match(r"^\d{4}-\d{4}$", text):
-        return text
+    if val == '1885-1986':
+        return '1985-1986'
+    match = re.match(r'(\d{4})-\d{4}', val)
+    if match:
+        return val
     return None
 
-
-def extract_start_year(value: object) -> int | None:
-    if pd.isna(value) or value is None:
+def extract_start_year(val):
+    if pd.isna(val) or val is None:
         return None
-    match = re.match(r"^(\d{4})-\d{4}$", str(value))
-    return int(match.group(1)) if match else None
+    match = re.match(r'(\d{4})-\d{4}', val)
+    if match:
+        return int(match.group(1))
+    return None
 
-
-def clean_publication_status(value: object) -> str:
-    if pd.isna(value):
+def clean_fate(val):
+    if pd.isna(val):
         return "Missing/Unknown"
-    text = str(value).strip().lower()
-    if "unpublished" in text:
+    val = str(val).strip().lower()
+    if 'unpublished' in val:
         return "Unpublished"
-    if "published" in text:
-        if "conference" in text:
+    elif 'published' in val:
+        if 'conference' in val:
             return "Conference Paper"
-        if "confusion" in text:
+        elif 'confusion' in val:
             return "Unclear/Confusion"
         return "Published"
-    if "conference" in text or "poster" in text:
+    elif 'conference' in val or 'poster' in val:
         return "Conference Paper"
-    if "preprint" in text:
+    elif 'preprint' in val:
         return "Preprint"
-    if any(token in text for token in ["confusion", "confusing", "similar", "simiar", "same"]):
+    elif 'confusion' in val or 'confusing' in val or 'similar' in val or 'same' in val:
         return "Unclear/Confusion"
-    return "Other"
+    else:
+        return "Other"
 
+def map_taxa(val):
+    if pd.isna(val): return "Unknown"
+    return TAXA_MAPPING.get(str(val).strip().lower(), "Other / Miscellaneous")
 
-def clean_taxa(value: object) -> str:
-    if pd.isna(value):
-        return "Unknown"
-    text = str(value).strip().lower()
-    mapping = {
-        "Fish": ["fish", "actinopterygii", "actinopterygii."],
-        "Insects": ["insect", "insecta", "insecct", "inset", "diptera, culicidae.", "diptera, culicidae"],
-        "Birds": ["birds", "bird", "aves"],
-        "Mammals (non-primate)": ["mammals", "mammal", "mammalia", "rhodents"],
-        "Primates": ["primate", "primates", "primtes", "primates and \nmammals"],
-        "Reptiles & Amphibians": [
-            "amphibia",
-            "reptile",
-            "reptiles",
-            "reptilia",
-            "amphibia, reptiles",
-            "amphibia,reptile",
-        ],
-        "Invertebrates (non-insect)": [
-            "arthropods",
-            "arthropod",
-            "arthopods",
-            "arachmids",
-            "mollusca",
-            "micro-invertebrates",
-            "macro-invertebrates",
-        ],
-        "Plankton & Benthos": [
-            "plankton",
-            "benthos",
-            "phytoplankton",
-            "zoo plankton",
-            "rotifera,daphnia",
-            "plankton diversity",
-        ],
-        "Ecology & Conservation": [
-            "conservation",
-            "diversity",
-            "fisherman livelihood",
-            "wildlife",
-            "condition",
-            "biodiversity",
-            "threatened",
-            "impact",
-            "pollution",
-            "quality",
-            "threat",
-            "management",
-            "livlihood",
-        ],
-        "Micro-organisms / Toxicology": ["insecticide", "micro-organism", "pesticide", "protists"],
-        "Mixed Taxa": [
-            "fish and \nthropods",
-            "fish and arthropods",
-            "birds and mammals",
-            "mammal and aves",
-            "fish and \narthropods",
-        ],
-    }
-    for label, values in mapping.items():
-        if text in values:
-            return label
-    return "Other / Miscellaneous"
-
-
-def parse_duration_months(value: object) -> int | None:
-    if pd.isna(value):
+def parse_months(val):
+    if pd.isna(val):
         return None
-    match = re.search(r"(\d+)\s*month", str(value).strip().lower())
-    return int(match.group(1)) if match else None
+    val = str(val).strip().lower()
+    match = re.search(r'(\d+)\s*month', val)
+    if match:
+        return int(match.group(1))
+    return None
 
-
-def clean_district(value: object) -> str:
-    if pd.isna(value):
+def clean_district(val):
+    if pd.isna(val):
         return "Not Specified"
-    text = str(value).strip()
-    lowered = text.lower()
-    if lowered == "dhaka":
-        return "Dhaka"
-    if "cox" in lowered and "bazar" in lowered:
+    val_lower = str(val).strip().lower()
+    if 'cox' in val_lower and 'bazar' in val_lower:
         return "Cox's Bazar"
-    if "moulovibazar" in lowered or "moulvibazar" in lowered:
-        return "Moulvibazar"
-    if "chittagong" in lowered:
-        return "Chittagong"
-    if "sylhet" in lowered:
-        return "Sylhet"
-    if "tangail" in lowered:
-        return "Tangail"
-    if "gazipur" in lowered:
-        return "Gazipur"
-    if "manikganj" in lowered:
-        return "Manikganj"
-    if "habiganj" in lowered:
-        return "Habiganj"
-    if "dinajpur" in lowered:
-        return "Dinajpur"
-    if "sundarban" in lowered:
-        return "Sundarbans"
-    if "madaripur" in lowered:
-        return "Madaripur"
-    if "netrokona" in lowered:
-        return "Netrokona"
-    if "pabna" in lowered:
-        return "Pabna"
-    if "rangpur" in lowered:
-        return "Rangpur"
-    if "jessore" in lowered:
-        return "Jessore"
-    if "narayanganj" in lowered:
-        return "Narayanganj"
-    if "comilla" in lowered:
-        return "Comilla"
-    return text
+    if 'sundarban' in val_lower:
+        return 'Sundarbans'
+    return DISTRICT_MAPPING.get(val_lower, val)
 
-
-def load_data(file_path: str | Path = DATA_FILE) -> pd.DataFrame:
-    df = pd.read_excel(file_path, sheet_name="Sheet1", header=3)
+def load_data(file_path: str) -> pd.DataFrame:
+    df = pd.read_excel(file_path, sheet_name='Sheet1', header=3)
     df.columns = df.columns.str.strip()
 
-    cleaned = df.copy()
-    cleaned["Research_Type"] = cleaned["Types of research"].apply(clean_research_type)
-    cleaned = cleaned[cleaned["Research_Type"].isin(["Thesis", "Non-Thesis"])].copy()
-    cleaned["Year_Cleaned"] = cleaned["Year"].apply(clean_year)
-    cleaned["Start_Year"] = cleaned["Year_Cleaned"].apply(extract_start_year)
-    cleaned["Publication_Status"] = cleaned["Fate"].apply(clean_publication_status)
-    cleaned["Taxa_Cleaned"] = cleaned["Taxa involved"].apply(clean_taxa)
-    cleaned["Duration_Months"] = cleaned["Time Required"].apply(parse_duration_months)
-    cleaned["District_Cleaned"] = cleaned["District"].apply(clean_district)
-    cleaned["Title"] = cleaned["Title"].fillna("Untitled").astype(str).str.strip()
-    cleaned["Author"] = cleaned["Author"].fillna("Unknown").astype(str).str.strip()
-    cleaned["Location"] = cleaned["Location"].fillna("Not Specified").astype(str).str.strip()
-    return cleaned.reset_index(drop=True)
+    df_clean = df.copy()
+    df_clean['Research_Type'] = df_clean['Types of research'].apply(clean_research_type)
+    df_clean = df_clean[df_clean['Research_Type'].isin(['Thesis', 'Non-Thesis'])]
+    df_clean['Year_Cleaned'] = df_clean['Year'].apply(clean_year)
+    df_clean['Start_Year'] = df_clean['Year_Cleaned'].apply(extract_start_year)
+    df_clean['Publication_Status'] = df_clean['Fate'].apply(clean_fate)
+    df_clean['Taxa_Cleaned'] = df_clean['Taxa involved'].apply(map_taxa)
+    df_clean['Duration_Months'] = df_clean['Time Required'].apply(parse_months)
+    df_clean['District_Cleaned'] = df_clean['District'].apply(clean_district)
 
+    return df_clean
 
 def filter_data(
     df: pd.DataFrame,
@@ -203,51 +109,73 @@ def filter_data(
     taxa: list[str],
     statuses: list[str],
     districts: list[str],
-    search_text: str = "",
+    search_text: str,
 ) -> pd.DataFrame:
-    filtered = df.copy()
+    filtered_df = df.copy()
+
     if research_types:
-        filtered = filtered[filtered["Research_Type"].isin(research_types)]
-    filtered = filtered[
-        filtered["Start_Year"].isna()
-        | filtered["Start_Year"].between(year_range[0], year_range[1])
-    ]
+        filtered_df = filtered_df[filtered_df["Research_Type"].isin(research_types)]
+    if year_range:
+        min_year, max_year = year_range
+        filtered_df = filtered_df[
+            (filtered_df["Start_Year"] >= min_year) & (filtered_df["Start_Year"] <= max_year)
+        ]
     if taxa:
-        filtered = filtered[filtered["Taxa_Cleaned"].isin(taxa)]
+        filtered_df = filtered_df[filtered_df["Taxa_Cleaned"].isin(taxa)]
     if statuses:
-        filtered = filtered[filtered["Publication_Status"].isin(statuses)]
+        filtered_df = filtered_df[filtered_df["Publication_Status"].isin(statuses)]
     if districts:
-        filtered = filtered[filtered["District_Cleaned"].isin(districts)]
-    if search_text.strip():
-        pattern = re.escape(search_text.strip())
-        searchable = (
-            filtered["Title"].astype(str)
-            + " "
-            + filtered["Author"].astype(str)
-            + " "
-            + filtered["Taxa_Cleaned"].astype(str)
-            + " "
-            + filtered["District_Cleaned"].astype(str)
+        filtered_df = filtered_df[filtered_df["District_Cleaned"].isin(districts)]
+    if search_text:
+        search_text_lower = search_text.lower()
+        filtered_df = filtered_df[
+            filtered_df.apply(
+                lambda row: any(
+                    search_text_lower in str(x).lower()
+                    for x in row[
+                        ["Title", "Author", "Taxa_Cleaned", "District_Cleaned"]
+                    ].values
+                ),
+                axis=1,
+            )
+        ]
+    return filtered_df
+
+def summary_metrics(df: pd.DataFrame) -> dict:
+    total_records = len(df)
+    thesis_count = df[df["Research_Type"] == "Thesis"].shape[0]
+    non_thesis_count = df[df["Research_Type"] == "Non-Thesis"].shape[0]
+
+    published = df[df["Publication_Status"] == "Published"].shape[0]
+    conference = df[df["Publication_Status"] == "Conference Paper"].shape[0]
+    resolved_pubs = df[
+        df["Publication_Status"].isin(
+            ["Published", "Unpublished", "Conference Paper", "Preprint"]
         )
-        filtered = filtered[searchable.str.contains(pattern, case=False, na=False)]
-    return filtered
+    ].shape[0]
+    publication_rate = (
+        ((published + conference) / resolved_pubs * 100) if resolved_pubs > 0 else 0
+    )
 
+    avg_duration = df["Duration_Months"].mean()
+    missing_duration = df["Duration_Months"].isna().sum()
 
-def summary_metrics(df: pd.DataFrame) -> dict[str, object]:
-    resolved_pub = df[df["Publication_Status"].isin(["Published", "Unpublished", "Conference Paper", "Preprint"])]
-    disseminated = resolved_pub["Publication_Status"].isin(["Published", "Conference Paper"]).sum()
-    publication_rate = (disseminated / len(resolved_pub) * 100) if len(resolved_pub) else 0
+    top_taxa = df["Taxa_Cleaned"].mode()[0] if not df["Taxa_Cleaned"].empty else "N/A"
+    top_district = (
+        df[df["District_Cleaned"] != "Not Specified"]["District_Cleaned"].mode()[0]
+        if not df[df["District_Cleaned"] != "Not Specified"].empty
+        else "N/A"
+    )
+
     return {
-        "records": len(df),
-        "thesis": int((df["Research_Type"] == "Thesis").sum()),
-        "non_thesis": int((df["Research_Type"] == "Non-Thesis").sum()),
-        "year_min": int(df["Start_Year"].min()) if df["Start_Year"].notna().any() else None,
-        "year_max": int(df["Start_Year"].max()) if df["Start_Year"].notna().any() else None,
+        "records": total_records,
+        "thesis": thesis_count,
+        "non_thesis": non_thesis_count,
+        "published": published,
+        "conference": conference,
         "publication_rate": publication_rate,
-        "published": int((df["Publication_Status"] == "Published").sum()),
-        "conference": int((df["Publication_Status"] == "Conference Paper").sum()),
-        "avg_duration": df["Duration_Months"].mean(),
-        "missing_duration": int(df["Duration_Months"].isna().sum()),
-        "top_taxa": df["Taxa_Cleaned"].value_counts().idxmax() if not df.empty else "N/A",
-        "top_district": df["District_Cleaned"].value_counts().idxmax() if not df.empty else "N/A",
+        "avg_duration": avg_duration,
+        "missing_duration": missing_duration,
+        "top_taxa": top_taxa,
+        "top_district": top_district,
     }
