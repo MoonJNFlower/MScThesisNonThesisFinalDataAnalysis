@@ -1,0 +1,24 @@
+﻿
+
+Name            : python.exe
+CommandType     : Application
+Definition      : C:\Users\USER\AppData\Local\Programs\Python\Python314\python.exe
+Extension       : .exe
+Path            : C:\Users\USER\AppData\Local\Programs\Python\Python314\python.exe
+FileVersionInfo : File:             C:\Users\USER\AppData\Local\Programs\Python\Python314\python.exe
+                  InternalName:     Python Console
+                  OriginalFilename: python.exe
+                  FileVersion:      3.14.5
+                  FileDescription:  Python
+                  Product:          Python
+                  ProductVersion:   3.14.5
+                  Debug:            False
+                  Patched:          False
+                  PreRelease:       False
+                  PrivateBuild:     False
+                  SpecialBuild:     False
+                  Language:         Language Neutral
+                  
+
+
+

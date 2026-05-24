@@ -1,0 +1,7 @@
+out-file : Access to the path 'C:\test_echo.txt' is denied.
+At line:1 char:1
++ echo "hello" > test_echo.txt
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OpenError: (:) [Out-File], UnauthorizedAccessException
+    + FullyQualifiedErrorId : FileOpenFailure,Microsoft.PowerShell.Commands.OutFileCommand
+ 

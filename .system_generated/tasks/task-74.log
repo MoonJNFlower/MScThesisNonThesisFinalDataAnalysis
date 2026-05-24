@@ -1,0 +1,26 @@
+Collecting pandas
+  Downloading pandas-3.0.3-cp314-cp314-win_amd64.whl.metadata (19 kB)
+Collecting openpyxl
+  Downloading openpyxl-3.1.5-py2.py3-none-any.whl.metadata (2.5 kB)
+Collecting numpy>=2.3.3 (from pandas)
+  Downloading numpy-2.4.6-cp314-cp314-win_amd64.whl.metadata (6.6 kB)
+Collecting python-dateutil>=2.8.2 (from pandas)
+  Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+Collecting tzdata (from pandas)
+  Downloading tzdata-2026.2-py2.py3-none-any.whl.metadata (1.4 kB)
+Collecting et-xmlfile (from openpyxl)
+  Downloading et_xmlfile-2.0.0-py3-none-any.whl.metadata (2.7 kB)
+Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas)
+  Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Downloading pandas-3.0.3-cp314-cp314-win_amd64.whl (9.9 MB)
+   ---------------------------------------- 9.9/9.9 MB 3.1 MB/s  0:00:03
+Downloading openpyxl-3.1.5-py2.py3-none-any.whl (250 kB)
+Downloading numpy-2.4.6-cp314-cp314-win_amd64.whl (12.5 MB)
+   ---------------------------------------- 12.5/12.5 MB 3.7 MB/s  0:00:03
+Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+Downloading et_xmlfile-2.0.0-py3-none-any.whl (18 kB)
+Downloading tzdata-2026.2-py2.py3-none-any.whl (349 kB)
+Installing collected packages: tzdata, six, numpy, et-xmlfile, python-dateutil, openpyxl, pandas
+
+Successfully installed et-xmlfile-2.0.0 numpy-2.4.6 openpyxl-3.1.5 pandas-3.0.3 python-dateutil-2.9.0.post0 six-1.17.0 tzdata-2026.2
