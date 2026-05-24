@@ -3,14 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
-import re
-from mappings import TAXA_MAPPING, DISTRICT_MAPPING
+from analysis_core import load_data, DATA_FILE
 
 # File Paths
 script_dir = os.path.dirname(__file__)
-file_path = os.path.join(script_dir, "M.Sc_thesis_non-thesis_final_data_sheet.xlsx")
 artifact_dir = os.path.join(script_dir, "artifacts")
-output_md_path = os.path.join(artifact_dir, "msc_thesis_analysis_report.md")
+output_md_path = os.path.join(script_dir, "msc_thesis_analysis_report.md")
 
 
 # Set plotting styles
@@ -18,110 +16,17 @@ sns.set_theme(style="whitegrid")
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'Helvetica']
 
-# Load Data
-df = pd.read_excel(file_path, sheet_name='Sheet1', header=3)
-df.columns = df.columns.str.strip()
-
-# Create clean columns
-df_clean = df.copy()
-
-# 1. Clean Research Type
-def clean_research_type(val):
-    if pd.isna(val):
-        return "Unknown"
-    val_str = str(val).strip().lower()
-    if 'non-thesis' in val_str:
-        return 'Non-Thesis'
-    elif 'thesis' in val_str:
-        return 'Thesis'
+# Load and Clean Data using core logic
+if os.path.exists(DATA_FILE):
+    df_clean = load_data(DATA_FILE)
+else:
+    # Fallback to Excel if parquet is not yet generated
+    excel_path = os.path.join(script_dir, "M.Sc_thesis_non-thesis_final_data_sheet.xlsx")
+    if os.path.exists(excel_path):
+        df_clean = load_data(excel_path)
     else:
-        return 'Other'
-
-df_clean['Research_Type'] = df_clean['Types of research'].apply(clean_research_type)
-
-# Filter out rows that are garbage
-df_clean = df_clean[df_clean['Research_Type'].isin(['Thesis', 'Non-Thesis'])]
-
-# 2. Clean Year
-def clean_year(val):
-    if pd.isna(val):
-        return None
-    val = str(val).strip()
-    if val.lower() == 'unknown' or val == '':
-        return None
-    if val == '1885-1986':
-        return '1985-1986'
-    match = re.match(r'(\d{4})-\d{4}', val)
-    if match:
-        return val
-    return None
-
-df_clean['Year_Cleaned'] = df_clean['Year'].apply(clean_year)
-
-def extract_start_year(val):
-    if pd.isna(val) or val is None:
-        return None
-    match = re.match(r'(\d{4})-\d{4}', val)
-    if match:
-        return int(match.group(1))
-    return None
-
-df_clean['Start_Year'] = df_clean['Year_Cleaned'].apply(extract_start_year)
-
-# 3. Clean Fate (Publication Status)
-def clean_fate(val):
-    if pd.isna(val):
-        return "Missing/Unknown"
-    val = str(val).strip().lower()
-    if 'unpublished' in val:
-        return "Unpublished"
-    elif 'published' in val:
-        if 'conference' in val:
-            return "Conference Paper"
-        elif 'confusion' in val:
-            return "Unclear/Confusion"
-        return "Published"
-    elif 'conference' in val or 'poster' in val:
-        return "Conference Paper"
-    elif 'preprint' in val:
-        return "Preprint"
-    elif 'confusion' in val or 'confusing' in val or 'similar' in val or 'same' in val:
-        return "Unclear/Confusion"
-    else:
-        return "Other"
-
-df_clean['Publication_Status'] = df_clean['Fate'].apply(clean_fate)
-
-# 4. Clean Taxa Involved
-def map_taxa(val):
-    if pd.isna(val): return "Unknown"
-    return TAXA_MAPPING.get(str(val).strip().lower(), "Other / Miscellaneous")
-
-df_clean['Taxa_Cleaned'] = df_clean['Taxa involved'].apply(map_taxa)
-
-# 5. Clean Time Required (Duration in months)
-def parse_months(val):
-    if pd.isna(val):
-        return None
-    val = str(val).strip().lower()
-    match = re.search(r'(\d+)\s*month', val)
-    if match:
-        return int(match.group(1))
-    return None
-
-df_clean['Duration_Months'] = df_clean['Time Required'].apply(parse_months)
-
-# 6. Clean District
-def clean_district(val):
-    if pd.isna(val):
-        return "Not Specified" # Default for NaN
-    val_lower = str(val).strip().lower()
-    # Check for specific substrings first, then direct mapping
-    if 'cox' in val_lower and 'bazar' in val_lower: return "Cox's Bazar"
-    if 'sundarban' in val_lower: return 'Sundarbans'
-    return DISTRICT_MAPPING.get(val_lower, val) # Return original if not found in map
-
-df_clean['District_Cleaned'] = df_clean['District'].apply(clean_district)
+        print(f"Error: No data source found. Please ensure {DATA_FILE} or Excel file exists.")
+        exit(1)
 
 # Ensure output directory exists
 os.makedirs(artifact_dir, exist_ok=True)
@@ -259,7 +164,7 @@ The dataset contains **{total_records}** clean records of M.Sc research projects
 
 Thesis research represents the vast majority of the research database. However, non-thesis projects form a substantial subset of student research, particularly in recent years.
 
-![Research Project Type Distribution](file:///{os.path.join(artifact_dir, "research_type_dist.png").replace('\\', '/')})
+![Research Project Type Distribution](./artifacts/research_type_dist.png)
 
 ---
 
@@ -269,7 +174,7 @@ The volume of M.Sc research has grown significantly over time, with marked fluct
 * **Theses** have been consistently conducted since 1985.
 * **Non-Theses** appear in the records primarily in later periods.
 
-![Research Trends Over Time](file:///{os.path.join(artifact_dir, "research_trends.png").replace('\\', '/')})
+![Research Trends Over Time](./artifacts/research_trends.png)
 
 ### Volume by Academic Year (Recent 15 Years)
 Below is the volume of M.Sc research projects conducted in the last 15 academic years recorded in the dataset:
@@ -291,7 +196,7 @@ md_content += f"""
 
 Research is highly focused on specific zoological taxa. **Fish** and **Insects** make up the vast majority (nearly **48%**) of all research projects.
 
-![Taxonomic Focus](file:///{os.path.join(artifact_dir, "taxa_distribution.png").replace('\\', '/')})
+![Taxonomic Focus](./artifacts/taxa_distribution.png)
 
 ### Research Volume by Taxa Category
 
@@ -317,7 +222,7 @@ A key measure of research impact is the publication rate.
 * **Published** articles account for **{df_clean['Publication_Status'].value_counts().get('Published', 0)}** projects.
 * Other dissemination modes include **Conference Papers** and **Preprints**.
 
-![Publication Status Breakdown](file:///{os.path.join(artifact_dir, "publication_rates.png").replace('\\', '/')})
+![Publication Status Breakdown](./artifacts/publication_rates.png)
 
 ### Detailed Publication Status Breakdown
 
@@ -360,7 +265,7 @@ The standard duration for both project types is typically **12 months**, but som
 
 Research is heavily clustered in specific geographic districts. **Dhaka** is by far the most dominant research location, representing the location of the host institute (Jahangirnagar University is situated in Savar, Dhaka district) and local sampling.
 
-![Top Districts Studied](file:///{os.path.join(artifact_dir, "top_districts.png").replace('\\', '/')})
+![Top Districts Studied](./artifacts/top_districts.png)
 
 ### Top 15 Districts / Regions Studied
 

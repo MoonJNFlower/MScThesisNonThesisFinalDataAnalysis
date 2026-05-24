@@ -59,10 +59,25 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# Logic to handle secret data on Cloud
+def get_data():
+    # 1. Try to load from local file (for local development)
+    if os.path.exists(DATA_FILE):
+        return cached_load_data(DATA_FILE)
+    
+    # 2. If file is missing, ask for upload (Fallback)
+    st.warning("⚠️ Research dataset (.parquet) not found in the repository.")
+    uploaded_file = st.sidebar.file_uploader("Upload dataset", type=["xlsx", "parquet"])
+    
+    if uploaded_file is not None:
+        return cached_load_data(uploaded_file)
+    else:
+        st.info("Please upload the required Excel dataset in the sidebar to proceed.")
+        st.stop()
 
-@st.cache_data(show_spinner="Loading and cleaning the workbook...")
-def cached_data() -> pd.DataFrame:
-    return load_data(DATA_FILE)
+@st.cache_data(show_spinner="Processing workbook...")
+def cached_load_data(source) -> pd.DataFrame:
+    return load_data(source)
 
 
 def pct(value: float | int | None) -> str:
@@ -99,7 +114,7 @@ def empty_state(message: str) -> None:
     st.info(message)
 
 
-df = cached_data()
+df = get_data()
 year_values = sorted(df["Start_Year"].dropna().astype(int).unique())
 min_year = min(year_values)
 max_year = max(year_values)
@@ -148,7 +163,11 @@ metric_cols = st.columns(6)
 metric_cols[0].metric("Clean Records", f"{metrics['records']:,}", f"{metrics['records'] - all_metrics['records']:+,} vs all")
 metric_cols[1].metric("Thesis", f"{metrics['thesis']:,}")
 metric_cols[2].metric("Non-Thesis", f"{metrics['non_thesis']:,}")
-metric_cols[3].metric("Publication Rate", pct(metrics["publication_rate"]))
+metric_cols[3].metric(
+    "Publication Rate", 
+    pct(metrics["publication_rate"]),
+    help="Ratio of 'Published' or 'Conference Paper' to all resolved publication records (excludes Missing/Unknown/Unclear)."
+)
 metric_cols[4].metric("Avg Duration", months(metrics["avg_duration"]))
 metric_cols[5].metric("Top Taxa", str(metrics["top_taxa"]))
 

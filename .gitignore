@@ -2,3 +2,20 @@ __pycache__/
 *.pyc
 .streamlit/secrets.toml
 
+# Debugging artifacts
+path.txt
+path_utf8.txt
+py_test.txt
+py_test_bypass.txt
+where_python.txt
+get_cmd_py.txt
+
+# Utility scripts
+inspect_*.py
+list_all_taxa.py
+check_*.py
+
+# Data and Results (Secrecy)
+*.xlsx
+artifacts/
+# We do NOT ignore *.parquet because we want to host it on Git

@@ -4,7 +4,7 @@
 This project analyzes M.Sc. research trends (Thesis vs. Non-Thesis) from the Department of Zoology at Jahangirnagar University (1985–2023). It transforms a raw Excel data sheet into a structured analytical report with visualizations.
 
 ## Data Pipeline Details
-- **Source File:** `M.Sc_thesis_non-thesis_final_data_sheet.xlsx`
+- **Source File:** `M.Sc_research_data.parquet` (processed from Excel)
 - **Primary Script:** `generate_analysis.py`
 - **Tech Stack:** Python (Pandas, Matplotlib, Seaborn, Regex)
 
@@ -25,7 +25,8 @@ This project analyzes M.Sc. research trends (Thesis vs. Non-Thesis) from the Dep
 - **Duration:** Extracted from "Time Required" column, typically centering around a 12-month cycle.
 
 ## Project Structure
-- `generate_analysis.py`: Main processing and report generation.
+- `generate_analysis.py`: Report generation script, uses `analysis_core.py`.
+- `analysis_core.py`: Central logic for data loading, cleaning, and filtering.
 - `inspect_*.py`: Utility scripts for data validation and header checking.
 - `msc_thesis_analysis_report.md`: The final generated output.
 - `README_STREAMLIT.md`: Instructions for the interactive dashboard.
@@ -34,3 +35,6 @@ This project analyzes M.Sc. research trends (Thesis vs. Non-Thesis) from the Dep
 - When modifying `generate_analysis.py`, ensure that any new taxa or district mappings are added to the corresponding cleaning functions (`map_taxa` or `clean_district`).
 - Visualizations should maintain the `whitegrid` theme and use the specific color hex codes (e.g., `#4a90e2` for Thesis) for consistency.
 - Paths are currently hardcoded to `D:\data ana\`. If moving to a portable environment, consider using relative paths.
+- **Performance**: Use vectorized Pandas operations in `analysis_core.py` for filtering and searching. Avoid `apply()` on large DataFrames.
+- **Validation**: The `load_data` function validates the presence of mandatory Excel columns.
+- **Security**: The raw Excel dataset and generated artifacts are excluded from version control to maintain secrecy. Always treat the source workbook as sensitive information.

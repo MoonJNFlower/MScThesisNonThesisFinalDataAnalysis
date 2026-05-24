@@ -4,11 +4,12 @@ import os
 import re
 import pandas as pd
 import numpy as np
+from typing import Union, IO
 from mappings import TAXA_MAPPING, DISTRICT_MAPPING
 
 # Define the data file path relative to this script
 SCRIPT_DIR = os.path.dirname(__file__)
-DATA_FILE = os.path.join(SCRIPT_DIR, "M.Sc_thesis_non-thesis_final_data_sheet.xlsx")
+DATA_FILE = os.path.join(SCRIPT_DIR, "M.Sc_research_data.parquet")
 
 def clean_research_type(val):
     if pd.isna(val):
@@ -86,9 +87,28 @@ def clean_district(val):
         return 'Sundarbans'
     return DISTRICT_MAPPING.get(val_lower, val)
 
-def load_data(file_path: str) -> pd.DataFrame:
-    df = pd.read_excel(file_path, sheet_name='Sheet1', header=3)
+def load_data(file_source: Union[str, IO]) -> pd.DataFrame:
+    # Detect if we are loading a Parquet file or Excel
+    is_parquet = False
+    if isinstance(file_source, str):
+        is_parquet = file_source.endswith('.parquet')
+    elif hasattr(file_source, 'name'):
+        is_parquet = file_source.name.endswith('.parquet')
+
+    try:
+        if is_parquet:
+            return pd.read_parquet(file_source, engine='pyarrow')
+        df = pd.read_excel(file_source, sheet_name='Sheet1', header=3)
+    except Exception as e:
+        raise FileNotFoundError(f"Could not load data. Error: {e}")
+
     df.columns = df.columns.str.strip()
+
+    # Robustness: Validate expected columns exist
+    required = ['Types of research', 'Year', 'Fate', 'Taxa involved', 'Time Required', 'District', 'Title', 'Author']
+    missing = [c for c in required if c not in df.columns]
+    if missing:
+        raise ValueError(f"Excel sheet is missing required columns: {missing}")
 
     df_clean = df.copy()
     df_clean['Research_Type'] = df_clean['Types of research'].apply(clean_research_type)
@@ -111,35 +131,33 @@ def filter_data(
     districts: list[str],
     search_text: str,
 ) -> pd.DataFrame:
-    filtered_df = df.copy()
+    # Performance: Use a boolean mask for filtering instead of creating multiple intermediate copies
+    mask = pd.Series(True, index=df.index)
 
     if research_types:
-        filtered_df = filtered_df[filtered_df["Research_Type"].isin(research_types)]
+        mask &= df["Research_Type"].isin(research_types)
     if year_range:
         min_year, max_year = year_range
-        filtered_df = filtered_df[
-            (filtered_df["Start_Year"] >= min_year) & (filtered_df["Start_Year"] <= max_year)
-        ]
+        mask &= (df["Start_Year"] >= min_year) & (df["Start_Year"] <= max_year)
     if taxa:
-        filtered_df = filtered_df[filtered_df["Taxa_Cleaned"].isin(taxa)]
+        mask &= df["Taxa_Cleaned"].isin(taxa)
     if statuses:
-        filtered_df = filtered_df[filtered_df["Publication_Status"].isin(statuses)]
+        mask &= df["Publication_Status"].isin(statuses)
     if districts:
-        filtered_df = filtered_df[filtered_df["District_Cleaned"].isin(districts)]
+        mask &= df["District_Cleaned"].isin(districts)
+
     if search_text:
-        search_text_lower = search_text.lower()
-        filtered_df = filtered_df[
-            filtered_df.apply(
-                lambda row: any(
-                    search_text_lower in str(x).lower()
-                    for x in row[
-                        ["Title", "Author", "Taxa_Cleaned", "District_Cleaned"]
-                    ].values
-                ),
-                axis=1,
-            )
-        ]
-    return filtered_df
+        s = search_text.lower()
+        # Performance: Vectorized string search is significantly faster than row-by-row apply()
+        search_mask = (
+            df["Title"].str.contains(s, case=False, na=False) |
+            df["Author"].str.contains(s, case=False, na=False) |
+            df["Taxa_Cleaned"].str.contains(s, case=False, na=False) |
+            df["District_Cleaned"].str.contains(s, case=False, na=False)
+        )
+        mask &= search_mask
+
+    return df[mask]
 
 def summary_metrics(df: pd.DataFrame) -> dict:
     total_records = len(df)
